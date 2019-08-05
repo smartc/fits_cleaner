@@ -50,7 +50,7 @@ def clean_header(filename):
 	fits.writeto(filename, data, hdr, overwrite=True)
 
 if __name__ == "__main__":
-	images = list_fits(TGT)
+	images = list_fits()
 
 	for f in images:
 		print("Processing file: " + f)
