@@ -8,10 +8,6 @@ execfile(activate_this, dict(__file__=activate_this))
 from astropy.io import fits
 from glob import glob
 
-
-# TEMP VARIABLE FOR DEVELOPMENT
-TGT = "/storage/titan/PI_TempFiles/IC4895_temp-files/00-Source/2018-09/Light/L"
-
 def list_fits(tgtDir=None, prefix = "", imageType = "fit"):
 	filePattern = prefix + "*." + imageType
 	
