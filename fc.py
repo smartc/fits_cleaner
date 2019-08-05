@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, inspect
+import os, inspect, sys
 DIR = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 activate_this = DIR + "/venv/bin/activate_this.py"
 execfile(activate_this, dict(__file__=activate_this))
@@ -8,18 +8,15 @@ execfile(activate_this, dict(__file__=activate_this))
 from astropy.io import fits
 from glob import glob
 
-def list_fits(tgtDir=None, prefix = "", imageType = "fit"):
+
+def list_fits(prefix = "", imageType = "fit"):
 	filePattern = prefix + "*." + imageType
-	
-	if tgtDir is None:
-		tgtDir = os.getcwd()
-	else:
-		os.chdir(tgtDir)
 
 	images = glob(filePattern)
 	images.sort()
 
 	return images
+
 
 def clean_header(filename):
 	data,hdr = fits.getdata(filename, header=True)
@@ -49,9 +46,37 @@ def clean_header(filename):
 
 	fits.writeto(filename, data, hdr, overwrite=True)
 
-if __name__ == "__main__":
-	images = list_fits()
 
-	for f in images:
-		print("Processing file: " + f)
-		clean_header(f)
+def process_subfolders(tgtDir = None):
+	if tgtDir is None:
+		tgtDir = os.getcwd()
+	else:
+		os.chdir(tgtDir)
+
+	for subdir, dirs, files in os.walk(tgtDir):
+		os.chdir(subdir)
+		images = list_fits()
+
+		for f in images:
+			print "Processing file:", os.path.join(subdir,f)
+			try:
+				clean_header(f)
+			except KeyError:
+				pass
+			except:
+				print "*** Error processing file:", f," ***"
+				raise
+
+		os.chdir(tgtDir)
+
+
+if __name__ == "__main__":
+	try:
+		tgtDir = sys.argv[1]
+	except IndexError:
+		tgtDir = None
+	except:
+		print "Unexpected error:", sys.exc_info()[0]
+		raise
+
+	process_subfolders(tgtDir)
